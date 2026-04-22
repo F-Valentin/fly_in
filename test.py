@@ -25,6 +25,7 @@ class ZoneMetadata:
             return ZoneMetadata()
 
         metadata = {}
+        line = line.strip("[]")
 
         for data in line.split():
             data = data.split("=")
@@ -136,6 +137,19 @@ class Zone:
 
         return Zone(name, position, metadata, type_name)
 
+    def add_connection(
+            self, connections: list[Connection], zones: dict[str, Zone]) -> None:
+        for connection in connections:
+            if self.name == connection.start.name:
+                self.connections.append(connection)
+                dest = zones[connection.dest.name]
+                dest.connections.append(
+                    Connection(
+                        dest,
+                        self,
+                        connection.max_link_capacity,
+                        "connection"))
+
 
 class Connection:
     def __init__(self, start: Zone, dest: Zone,
@@ -176,11 +190,21 @@ class Connection:
 
 
 class Parser():
-    def __init__(self, file: str) -> None:
-        self.file = file
+    def __init__(self, file_path: str) -> None:
+        self.file_path = file_path
+        self.file = ""
         self.zones: dict[str, Zone] = {}
         self.connections: list[Connection] = []
         self.data = {}
+
+    def open_file(self) -> bool:
+        try:
+            with open(self.file_path) as f:
+                self.file = f.readlines()
+        except (FileNotFoundError, PermissionError) as e:
+            print(e)
+            return False
+        return True
 
     def parse(self) -> dict:
         nb_drones = 0
@@ -206,12 +230,14 @@ class Parser():
                 except ValueError as e:
                     raise e
 
-            elif line.startswith("hub:") or line.endswith("_hub"):
+            elif (line.startswith("hub:") or line.startswith("start_hub:")
+                  or line.startswith("end_hub:")):
                 try:
                     zone = Zone.from_line(line)
 
-                    if zone.name in zone_names:
-                        raise ParsingError(f"The hub {zone.name} already exist")
+                    if zone.name in self.zones:
+                        raise ParsingError(
+                            f"The hub {zone.name} already exist")
 
                     if zone.type_name == "start_hub":
                         if start_hub:
@@ -225,7 +251,6 @@ class Parser():
                         self.data["end_hub"] = zone
                         end_hub = True
 
-                    zone_names.append(zone.name)
                     self.zones[zone.name] = zone
                 except (ValueError, ParsingError) as e:
                     raise e
@@ -233,8 +258,20 @@ class Parser():
             elif line.startswith("connection:"):
                 try:
                     connection = Connection.from_line(line, self.zones)
+                    self.connections.append(connection)
                 except (ValueError, ParsingError) as e:
                     raise e
+
+        if not nb_drones:
+            raise ParsingError("nb_drones is missing")
+
+        if not start_hub or not end_hub:
+            raise ParsingError("start hub or end hub is/are missing")
+
+        for zone in self.zones.values():
+            zone.add_connection(self.connections, self.zones)
+
         self.data["nb_drones"] = nb_drones
+        self.data["zones"] = self.zones
 
         return self.data
