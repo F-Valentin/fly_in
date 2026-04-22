@@ -149,7 +149,7 @@ class Connection:
     def from_line(line: str, zones: dict[str, Zone]) -> "Connection":
         if not line:
             raise ParsingError("A empty line what")
-        
+
         (type_name, _, strs) = line.partition(":")
 
         strs = strs.strip().split()
@@ -180,26 +180,61 @@ class Parser():
         self.file = file
         self.zones: dict[str, Zone] = {}
         self.connections: list[Connection] = []
+        self.data = {}
 
-    # like a fsm
-    # # all of this is pseudo code
-    # def parse(self):
-    #     # start
-    #     if start:
-    #         # check if the first line is nb drone
-    #         # after start
-    #     for line in lines:
-    #         if line.startwith("hub: "):
-    #             if len(self.connections) > 0:
-    #                 raise ...
-    #             zone = Zone.from_line()
-    #             self.zones[zone.name] = zone
-    #         if line.startwith("connection: ") and len(self.zones) > 0:
-    #             if not len(self.zones):
-    #                 raise ...
-    #             self.connections.append(Connection.from_line())
-    #     # join the connection with its zone
-        # end
+    def parse(self) -> dict:
+        nb_drones = 0
+        start_hub = False
+        end_hub = False
 
-    # def is_valid_name(self) -> bool:
-    #     pass
+        for line in self.file:
+            line = line.strip()
+
+            if line.startswith("#"):
+                continue
+
+            if line.startswith("nb_drones:"):
+                if nb_drones != 0:
+                    raise ParsingError("nb_drones already define")
+
+                line = line.split(":")
+
+                try:
+                    nb_drones = int(line[1])
+                    if nb_drones < 0:
+                        raise ParsingError("negatif number not valid")
+                except ValueError as e:
+                    raise e
+
+            elif line.startswith("hub:") or line.endswith("_hub"):
+                try:
+                    zone = Zone.from_line(line)
+
+                    if zone.name in zone_names:
+                        raise ParsingError(f"The hub {zone.name} already exist")
+
+                    if zone.type_name == "start_hub":
+                        if start_hub:
+                            raise ParsingError("start hub already exist")
+                        self.data["start_hub"] = zone
+                        start_hub = True
+
+                    elif zone.type_name == "end_hub":
+                        if end_hub:
+                            raise ParsingError("end hub already exist")
+                        self.data["end_hub"] = zone
+                        end_hub = True
+
+                    zone_names.append(zone.name)
+                    self.zones[zone.name] = zone
+                except (ValueError, ParsingError) as e:
+                    raise e
+
+            elif line.startswith("connection:"):
+                try:
+                    connection = Connection.from_line(line, self.zones)
+                except (ValueError, ParsingError) as e:
+                    raise e
+        self.data["nb_drones"] = nb_drones
+
+        return self.data
