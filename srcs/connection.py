@@ -14,6 +14,7 @@ class ConnectionMetadata:
         if not line:
             return ConnectionMetadata()
 
+        line = line.strip("[]")
         data = line.split("=")
         if data[0].strip() != "max_link_capacity":
             raise ConnectionError(f"the metadata {data[0]} doesn't exist")
@@ -38,6 +39,7 @@ class Connection:
         self.start = start
         self.dest = dest
         self.max_link_capacity = max_link_capacity
+        self.waiting_drone: list["Drone"] = []
         self.type_name = type_name
 
     @staticmethod
@@ -70,7 +72,7 @@ class Connection:
         return (
             f"start: {self.start.name}, "
             f"dest: {self.dest.name}, "
-            f"max_link_capicity: {self.max_link_capacity}, "
+            f"max_link_capicity: {self.max_link_capacity}"
         )
 
     # def is_valid_connection(self) -> bool:

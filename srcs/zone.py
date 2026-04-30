@@ -13,9 +13,9 @@ class ZoneState(Enum):
 
 
 class ZoneMetadata:
-    def __init__(self, zone: ZoneState = ZoneState.NORMAL, color: str = "ESC[33m",
+    def __init__(self, state: ZoneState = ZoneState.NORMAL, color: str = "ESC[33m",
                  max_drones: int = 1) -> None:
-        self.zone = zone
+        self.state = state
         self.color = color
         self.max_drones = max_drones
 
@@ -43,7 +43,7 @@ class ZoneMetadata:
         for key in metadata:
             match key:
                 case "zone":
-                    m.zone = ZoneMetadata.set_zone(metadata[key])
+                    m.state = ZoneMetadata.set_state(metadata[key])
                 case "color":
                     m.color = metadata[key]
                 case "max_drones":
@@ -60,7 +60,7 @@ class ZoneMetadata:
         return m
 
     @staticmethod
-    def set_zone(zone_state: str) -> ZoneState:
+    def set_state(zone_state: str) -> ZoneState:
         match zone_state.strip().lower():
             case "normal":
                 return ZoneState.NORMAL
@@ -76,7 +76,7 @@ class ZoneMetadata:
 
     def __str__(self):
         return (
-            f"zone_state: {self.zone}, "
+            f"zone_state: {self.state}, "
             f"color: {self.color}, "
             f"max_drones: {self.max_drones}"
         )
@@ -85,7 +85,7 @@ class ZoneMetadata:
 class Zone:
 
     def __init__(self, name: str, position: tuple[int, int],
-                 metadata: ZoneMetadata | None, type_name: str = "", connections: list["Connection"] | None = None) -> None:
+                 metadata: ZoneMetadata, type_name: str = "", connections: list["Connection"] | None = None) -> None:
         self.name = name
         self.position = position
         self.metadata = metadata
@@ -132,6 +132,14 @@ class Zone:
                         self,
                         connection.max_link_capacity,
                         "connection"))
+
+    def get_cost(self) -> int:
+        match self.metadata.state:
+            case ZoneState.NORMAL | ZoneState.PRIORITY:
+                return 1
+            case ZoneState.RESTRICTED:
+                return 2
+            case _: return 0
 
     def __str__(self):
         connections_str = ", ".join(

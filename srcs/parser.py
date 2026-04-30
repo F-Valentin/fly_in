@@ -93,31 +93,3 @@ class Parser():
         self.data["zones"] = self.zones
 
         return self.data
-
-
-def main():
-    file_path = [
-        "../maps/easy/01_linear_path.txt",
-        # "maps/easy/02_simple_fork.txt",
-        # "maps/easy/03_basic_capacity.txt",
-        # "maps/medium/01_dead_end_trap.txt",
-        # "maps/medium/02_circular_loop.txt",
-        # "maps/medium/03_priority_puzzle.txt",
-        # "maps/hard/01_maze_nightmare.txt",
-        # "maps/hard/02_capacity_hell.txt",
-        # "maps/hard/03_ultimate_challenge.txt",
-    ]
-    for fp in file_path:
-        print(fp)
-        parser = Parser(fp)
-        try:
-            parser.open_file()
-            data = parser.parse()
-            zones = data["zones"]
-            for zone in zones.values():
-                print(zone)
-        except Exception as e:
-            print(e)
-
-
-main()
