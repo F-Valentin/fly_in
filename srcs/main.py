@@ -38,25 +38,20 @@ def main():
     all_paths = Solver.dfs(start, end)
 
     drones = Drone.create_drones(data["nb_drones"])
+    print(drones)
     for path in all_paths:
         paths.append(Path(path))
 
-    # dernier petit pb reussir a assigner les drones au chemin
-    idx = 0 
-    for (i, path) in enumerate(paths):
-        if i - 1 <= len(paths):
-            print("add drone")
-            idx = path.add_drones_until_equalize(drones, paths[i + 1].cost)
-    
-    for path in paths:
-        print(path.drones)
-    print(idx)
-    print(drones[idx:])
     paths.sort(key=lambda p: p.cost)
 
-    # simulation = Simulation(end)
+    Path.add_drones_to_paths(drones, paths)
 
-    # simulation.simulation(drones)
+    for path in paths:
+        print(path.drones)
+    simulation = Simulation(end)
+
+    turn = simulation.simulation(drones, paths)
+    print("turn ", turn)
      # for drone in drones:
     #     print(drone)
     # nb_of_drones = path.add_drones_until_equalize(drones, s_path.cost)

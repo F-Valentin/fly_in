@@ -1,6 +1,7 @@
 from zone import Zone
 from drone import Drone
 from connection import Connection
+from path import Path
 
 
 class Simulation:
@@ -69,7 +70,11 @@ class Simulation:
 
         return finished_drones
 
-    def simulation(self, drones: list[Drone]) -> int:
+    def simulation(self, drones: list[Drone], paths: list[Path]) -> int:
+        for path in paths:
+            for drone in path.drones:
+                drone.path.extend(path.path)
+
         while drones:
             if self.turn == 4:
                 break
