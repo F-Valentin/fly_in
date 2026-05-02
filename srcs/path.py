@@ -31,10 +31,9 @@ class Path:
     def add_drones_until_equalize(
             self, drones: list[Drone], next_path_cost: int) -> int:
         max_drones = self.find_min_max_drones()
-        print("max_drones min ", max_drones)
 
         for (idx, drone) in enumerate(drones):
-            if self.cost + (idx + 1 - max_drones) >= next_path_cost:
+            if self.cost + (idx - max_drones) >= next_path_cost:
                 return idx
 
             self.drones.append(drone)
@@ -45,6 +44,7 @@ class Path:
     def add_drones_to_paths(drones: list[Drone], paths: list[Path]) -> None:
         paths_len = len(paths)
         nb_drones_add = 0
+        old_nb_drones_add  = 0
 
         if paths_len == 1:
             for drone in drones:
@@ -53,14 +53,19 @@ class Path:
             
         for (i, path) in enumerate(paths):
             if i + 1 < paths_len:
-                nb_drones_add += path.add_drones_until_equalize(drones, paths[i + 1].cost)
+                old_nb_drones_add = nb_drones_add
+                nb_drones_add += path.add_drones_until_equalize(drones[nb_drones_add:], paths[i + 1].cost)
             else:
                 d = drones[nb_drones_add:]
-                for i in range(nb_drones_add):
+                d_len = len(d) - old_nb_drones_add
+                for i in range(d_len):
                     path.drones.append(d[i])
-                nb_drones_add += nb_drones_add
+                    nb_drones_add += 1
         
         i = 0
+        if nb_drones_add == len(drones):
+            return
+
         for drone in drones[nb_drones_add:]:
             paths[i].drones.append(drone)
             i = (i + 1) % paths_len
