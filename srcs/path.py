@@ -62,10 +62,10 @@ class Path:
                     path.drones.append(d[i])
                     nb_drones_add += 1
         
-        i = 0
         if nb_drones_add == len(drones):
             return
 
+        i = 0
         for drone in drones[nb_drones_add:]:
             paths[i].drones.append(drone)
             i = (i + 1) % paths_len

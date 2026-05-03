@@ -61,6 +61,7 @@ class Simulation:
 
     def _process_departures(self, drones: list[Drone]) -> list[str]:
         movements: list[str] = []
+
         for drone in drones:
             if len(drone.path) <= 1:
                 print("error path len < 1")
