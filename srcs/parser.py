@@ -84,6 +84,8 @@ class Parser():
                                 raise ParsingError("a-b b-a error")
                             if connection.start.name == conn.start.name and connection.dest.name == conn.dest.name:
                                 raise ParsingError("same conn")
+                            if connection.start.position[0] == conn.start.position[0] and connection.dest.position[1] == conn.dest.position[1]:
+                                raise ParsingError("same coord")
 
                         self.connections.append(connection)
                     except (ValueError, ParsingError) as e:
