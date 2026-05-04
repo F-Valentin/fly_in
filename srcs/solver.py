@@ -1,5 +1,5 @@
 from drone import Drone
-from zone import Zone
+from zone import Zone, ZoneState
 from connection import Connection
 
 
@@ -13,6 +13,9 @@ class Solver:
 
         # take care about max_link_capacity = 0 to remove useless path
         path.append(source)
+
+        if source.metadata.state == ZoneState.BLOCKED:
+            return
 
         if source.name == dest.name:
             all_paths.append(path.copy())

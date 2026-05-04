@@ -8,15 +8,15 @@ from simulation import Simulation
 def main():
     file_path = [
         "../maps/easy/01_linear_path.txt",
-        "../maps/easy/02_simple_fork.txt",
-        "../maps/easy/03_basic_capacity.txt",
-        "../maps/medium/01_dead_end_trap.txt",
-        "../maps/medium/02_circular_loop.txt",
-        "../maps/medium/03_priority_puzzle.txt",
-        "../maps/hard/01_maze_nightmare.txt",
-        "../maps/hard/02_capacity_hell.txt",
-        "../maps/hard/03_ultimate_challenge.txt",
-        "../maps/challenger/01_the_impossible_dream.txt",
+        # "../maps/easy/02_simple_fork.txt",
+        # "../maps/easy/03_basic_capacity.txt",
+        # "../maps/medium/01_dead_end_trap.txt",
+        # "../maps/medium/02_circular_loop.txt",
+        # "../maps/medium/03_priority_puzzle.txt",
+        # "../maps/hard/01_maze_nightmare.txt",
+        # "../maps/hard/02_capacity_hell.txt",
+        # "../maps/hard/03_ultimate_challenge.txt",
+        # "../maps/challenger/01_the_impossible_dream.txt",
     ]
     for fp in file_path:
         parser = Parser(fp)
@@ -37,6 +37,10 @@ def main():
         paths: list[Path] = []
         all_paths = Solver.dfs(start, end)
 
+        if not all_paths:
+            print("nothing")
+            return
+
         drones = Drone.create_drones(data["nb_drones"])
         for path in all_paths:
             paths.append(Path(path))
@@ -45,6 +49,9 @@ def main():
         paths.sort(key=lambda p: (p.cost, -p.nb_of_priority_zones))
 
         Path.add_drones_to_paths(drones, paths)
+
+
+
          
 
 

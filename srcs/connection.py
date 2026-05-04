@@ -23,8 +23,8 @@ class ConnectionMetadata:
             try:
                 max_link_capacity = int(data[1])
 
-                if max_link_capacity < 0:
-                    raise ConnectionError("negatif value is not allowed")
+                if max_link_capacity <= 0:
+                    raise ConnectionError("0 or negatif value is not allowed")
             except ValueError as e:
                 raise e
         else:

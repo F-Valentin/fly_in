@@ -44,14 +44,14 @@ class ZoneMetadata:
             match key:
                 case "zone":
                     m.state = ZoneMetadata.set_state(metadata[key])
+                    print("m.state, ", m.state)
                 case "color":
                     m.color = metadata[key]
                 case "max_drones":
                     try:
                         max_drones = int(metadata[key])
-                        if max_drones < 0:
-                            raise ZoneError("negative number not allowed")
-                        m.max_drones = max_drones
+                        if max_drones <= 0:
+                            raise ZoneError("0 or negative number not allowed")
                     except ValueError as e:
                         raise e
                 case _:
@@ -120,7 +120,7 @@ class Zone:
         return Zone(name, position, metadata, type_name)
 
     def add_connection(
-            self, connections: list["Connection"], zones: dict[str, Zone]) -> None:
+            self, connections: list["Connection"], zones: dict[str, "Zone"]) -> None:
         from connection import Connection
         for connection in connections:
             if self.name == connection.start.name:

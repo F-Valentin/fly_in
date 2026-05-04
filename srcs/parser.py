@@ -1,4 +1,3 @@
-from enum import Enum
 from zone import Zone
 from connection import Connection
 
@@ -76,6 +75,12 @@ class Parser():
             elif line.startswith("connection:"):
                 try:
                     connection = Connection.from_line(line, self.zones)
+
+                    for conn in self.connections:
+                        if connection.start.name == conn.dest.name and connection.dest.name == conn.start.name:
+                            raise ParsingError("a-b b-a error")
+                        if connection.start.name == conn.start.name and connection.dest.name == conn.dest.name:
+                            raise ParsingError("bite")
                     self.connections.append(connection)
                 except (ValueError, ParsingError) as e:
                     raise e

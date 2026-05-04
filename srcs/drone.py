@@ -18,7 +18,7 @@ class Drone:
         return drones
 
     @staticmethod
-    def remove_drones_in_order(nb_of_drones: int, drones: list[Drone]):
+    def remove_drones_in_order(nb_of_drones: int, drones: list["Drone"]):
         new_drones = drones[nb_of_drones:]
         drones.clear()
         drones.extend(new_drones)

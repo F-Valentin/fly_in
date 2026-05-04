@@ -41,7 +41,7 @@ class Path:
         return len(drones)
     
     @staticmethod
-    def add_drones_to_paths(drones: list[Drone], paths: list[Path]) -> None:
+    def add_drones_to_paths(drones: list[Drone], paths: list["Path"]) -> None:
         paths_len = len(paths)
         nb_drones_add = 0
         old_nb_drones_add  = 0
