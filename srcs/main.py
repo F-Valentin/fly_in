@@ -28,6 +28,7 @@ def main():
             data = parser.parse()
             zones = data["zones"]
         except Exception as e:
+            print("herr")
             print(e)
             return
 

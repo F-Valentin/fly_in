@@ -27,6 +27,7 @@ class Parser():
         nb_drones = 0
         start_hub = False
         end_hub = False
+        start = True
 
         for line in self.file:
             line = line.strip()
@@ -35,6 +36,7 @@ class Parser():
                 continue
 
             if line.startswith("nb_drones:"):
+                start = False
                 if nb_drones != 0:
                     raise ParsingError("nb_drones already define")
 
@@ -47,43 +49,47 @@ class Parser():
                 except ValueError as e:
                     raise e
 
-            elif (line.startswith("hub:") or line.startswith("start_hub:")
-                  or line.startswith("end_hub:")):
-                try:
-                    zone = Zone.from_line(line)
+            elif not start:
+                if (line.startswith("hub:") or line.startswith("start_hub:")
+                    or line.startswith("end_hub:")):
+                    try:
+                        zone = Zone.from_line(line)
 
-                    if zone.name in self.zones:
-                        raise ParsingError(
-                            f"The hub {zone.name} already exist")
+                        if zone.name in self.zones:
+                            raise ParsingError(
+                                f"The hub {zone.name} already exist")
 
-                    if zone.type_name == "start_hub":
-                        if start_hub:
-                            raise ParsingError("start hub already exist")
-                        self.data["start_hub"] = zone
-                        start_hub = True
+                        if zone.type_name == "start_hub":
+                            if start_hub:
+                                raise ParsingError("start hub already exist")
+                            self.data["start_hub"] = zone
+                            start_hub = True
 
-                    elif zone.type_name == "end_hub":
-                        if end_hub:
-                            raise ParsingError("end hub already exist")
-                        self.data["end_hub"] = zone
-                        end_hub = True
+                        elif zone.type_name == "end_hub":
+                            if end_hub:
+                                raise ParsingError("end hub already exist")
+                            self.data["end_hub"] = zone
+                            end_hub = True
 
-                    self.zones[zone.name] = zone
-                except (ValueError, ParsingError) as e:
-                    raise e
+                        self.zones[zone.name] = zone
+                    except (ValueError, ParsingError) as e:
+                        raise e
 
-            elif line.startswith("connection:"):
-                try:
-                    connection = Connection.from_line(line, self.zones)
+                elif line.startswith("connection:"):
+                    try:
+                        connection = Connection.from_line(line, self.zones)
 
-                    for conn in self.connections:
-                        if connection.start.name == conn.dest.name and connection.dest.name == conn.start.name:
-                            raise ParsingError("a-b b-a error")
-                        if connection.start.name == conn.start.name and connection.dest.name == conn.dest.name:
-                            raise ParsingError("bite")
-                    self.connections.append(connection)
-                except (ValueError, ParsingError) as e:
-                    raise e
+                        for conn in self.connections:
+                            if connection.start.name == conn.dest.name and connection.dest.name == conn.start.name:
+                                raise ParsingError("a-b b-a error")
+                            if connection.start.name == conn.start.name and connection.dest.name == conn.dest.name:
+                                raise ParsingError("same conn")
+
+                        self.connections.append(connection)
+                    except (ValueError, ParsingError) as e:
+                        raise e
+            else:
+                raise ParsingError("nb dornesfohseaoifh") 
 
         if not nb_drones:
             raise ParsingError("nb_drones is missing")
